@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams, AlertController } from 'ionic-angular';
+import {Http, Headers, RequestOptions} from "@angular/http";
 
 
 @Component({
@@ -9,9 +10,10 @@ import { NavController, NavParams, AlertController } from 'ionic-angular';
 export class HomePage {
   selectedItem: any;
   icons: string[];
-  items: Array<{ title: string, note: string, icon: string }>;
+  items: Array<{ target: string, message: string, icon: string }>;
 
-  constructor(public messagesCtrl: NavController, public alertCtrl: AlertController, public navParams: NavParams) {
+  constructor(public messagesCtrl: NavController, public alertCtrl: AlertController,
+              public navParams: NavParams, public http: Http) {
     this.selectedItem = navParams.get('item');
 
     this.icons = ['bookmark'];
@@ -19,8 +21,8 @@ export class HomePage {
     this.items = [];
     for (let i = 1; i < 11; i++) {
       this.items.push({
-        title: 'Item ' + i,
-        note: 'This is item # fsdafd sdffa sdfds af ds fads afds fsad fasd ffsdfds' + i,
+        target: 'Item ' + i,
+        message: 'this is a test' + i,
         icon: this.icons[Math.floor(Math.random() * this.icons.length)]
       });
     }
@@ -49,7 +51,22 @@ export class HomePage {
   }
 
   itemSend(item) {
-    this.showConfirm();
+    let url = "https://hipchat.<domain>.com/v2/room/testing_room/message";
+    let headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    headers.append('Authorization', 'Bearer <token>');
+    let options = new RequestOptions({headers: headers});
+    let data = {
+      message: item.message
+    };
+
+    this.http.post(url, JSON.stringify(data), options)
+      .subscribe(data => {
+      console.log(data['_body']);
+    }, error => {
+      console.log(error);
+    });
+
   }
 
   itemDelete(item) {
